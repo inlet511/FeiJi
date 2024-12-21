@@ -1,4 +1,7 @@
-import { _decorator, Component, Node, Input, input, EventTouch, Vec3, instantiate, Prefab } from 'cc';
+import { _decorator, Component, Node, Input, input, EventTouch, Vec3, instantiate, Prefab, Collider2D, Contact2DType, Animation, AnimationState } from 'cc';
+import { Enemy } from './Enemy';
+import {GameManager} from './GameManager';
+
 const { ccclass, property } = _decorator;
 
 enum ShootType{
@@ -9,11 +12,14 @@ enum ShootType{
 @ccclass('Player')
 export class Player extends Component {
 
-
     @property
     shoot_rate:number = 0.5;
 
     shoot_timer:number = 0.5;
+
+
+    @property
+    health:number = 3;
 
     @property(Prefab)
     bulletPrefab:Prefab = null;
@@ -36,6 +42,30 @@ export class Player extends Component {
     @property(ShootType)
     shootType:ShootType = ShootType.Single;
 
+    collider:Collider2D = null;
+
+    anim:Animation = null;
+
+    protected start(): void {       
+
+        // 注册collider 事件
+        this.collider = this.node.getComponentInChildren(Collider2D);
+        if(this.collider)
+        {
+            this.collider.on(Contact2DType.BEGIN_CONTACT, this.onContact, this);
+        }
+
+        // 注册anim事件
+        this.anim = this.node.getComponentInChildren(Animation);
+        if(this.anim)
+        {
+            this.anim.on(Animation.EventType.FINISHED, this.onAnimFinished, this);
+        }
+
+        // 注册GameManager事件
+        //GameManager.Instance.eventTarget.on("player_die",this.onPlayerDie, this);
+        GameManager.Instance.listenTo("player_die", this.onPlayerDie, this);
+    }
 
     protected onLoad(): void {
         input.on(Input.EventType.TOUCH_MOVE,this.onTouchMove, this);
@@ -43,7 +73,52 @@ export class Player extends Component {
 
     protected onDestroy(): void {
         input.off(Input.EventType.TOUCH_MOVE,this.onTouchMove, this);
+
+        // 注销collider事件
+        if(this.collider)
+        {
+            this.collider.off(Contact2DType.BEGIN_CONTACT, this.onContact, this);
+        }
+
+        // 注销anim事件
+        if(this.anim)
+        {
+            this.anim.off(Animation.EventType.FINISHED, this.onAnimFinished, this)
+        }
     }
+
+    // 碰撞事件
+    onContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null)
+    {
+        if(otherCollider && otherCollider.node.getParent().getComponent(Enemy))
+        {
+            this.health -= 1;
+            if(this.health>0)
+            {
+                this.anim.play("player_blink");                
+            }else
+            {
+                this.anim.play("player_die");
+            }
+        }
+    }
+
+    // 动画播放完成事件
+    onAnimFinished(type: Animation.EventType, state: AnimationState)
+    {
+        if(state.clip.name == "player_die")
+        {
+            GameManager.Instance.broadcastPlayerDie();
+        }
+    }
+
+    onPlayerDie()
+    {
+        this.scheduleOnce(()=>{
+            this.node.destroy();
+        },0);
+    }
+
 
     onTouchMove(event:EventTouch)
     {
@@ -82,9 +157,6 @@ export class Player extends Component {
                 this.dualShoot(dt);
                 break;
         }
-
-
-        
     }
 
     singleShoot(dt:number)

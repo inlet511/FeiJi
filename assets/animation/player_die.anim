@@ -1,7 +1,7 @@
 [
   {
     "__type__": "cc.AnimationClip",
-    "_name": "enemy1_hit",
+    "_name": "player_die",
     "_objFlags": 0,
     "__editorExtras__": {
       "embeddedPlayerGroups": []
@@ -11,7 +11,7 @@
     "speed": 1,
     "wrapMode": 1,
     "enableTrsBlending": false,
-    "_duration": 0.1,
+    "_duration": 0.3,
     "_hash": 500763545,
     "_tracks": [
       {
@@ -62,17 +62,29 @@
     "__type__": "cc.ObjectCurve",
     "_times": [
       0,
-      0.08333333333333333
+      0.06666666666666667,
+      0.13333333333333333,
+      0.2,
+      0.2833333333333333
     ],
     "_values": [
       {
-        "__uuid__": "de239d3e-26b5-4e6e-9b6e-641b13ba1d33@f9941",
+        "__uuid__": "49418940-947f-4138-a564-4d135fad0b7e@f9941",
         "__expectedType__": "cc.SpriteFrame"
       },
       {
-        "__uuid__": "e5146a7f-9c99-4fb2-a7cb-87b4647671d8@f9941",
+        "__uuid__": "65b7e596-fad0-4a09-bd05-49476bf49137@f9941",
         "__expectedType__": "cc.SpriteFrame"
-      }
+      },
+      {
+        "__uuid__": "e6a2dce5-e500-420c-817c-7cecfd85128d@f9941",
+        "__expectedType__": "cc.SpriteFrame"
+      },
+      {
+        "__uuid__": "169b75bb-e05f-4848-a375-1102ff701c4c@f9941",
+        "__expectedType__": "cc.SpriteFrame"
+      },
+      null
     ]
   },
   {
