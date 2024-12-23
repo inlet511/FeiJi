@@ -42,6 +42,13 @@ export class Player extends Component {
     @property(ShootType)
     shootType:ShootType = ShootType.Single;
 
+    @property
+    invincibleTime:number = 1;
+
+    invincibleTimer:number = 0;
+
+    isInvincible:boolean = false;
+
     collider:Collider2D = null;
 
     anim:Animation = null;
@@ -90,12 +97,21 @@ export class Player extends Component {
     // 碰撞事件
     onContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null)
     {
+        if(this.isInvincible)
+        {
+            return;
+        }
+
+
         if(otherCollider && otherCollider.node.getParent().getComponent(Enemy))
         {
             this.health -= 1;
             if(this.health>0)
             {
-                this.anim.play("player_blink");                
+                this.anim.play("player_blink");
+                //设置为无敌
+                this.isInvincible = true;
+                this.invincibleTimer = 0;
             }else
             {
                 this.anim.play("player_die");
@@ -156,6 +172,15 @@ export class Player extends Component {
             case ShootType.Dual:
                 this.dualShoot(dt);
                 break;
+        }
+
+        if(this.isInvincible){
+            this.invincibleTimer += dt;
+            if(this.invincibleTimer>this.invincibleTime)
+            {
+                this.isInvincible = false;
+                this.invincibleTimer = 0;
+            }
         }
     }
 
